@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const https = require('node:https');
 
-const BASE_URL = process.env.VFLOW_BASE_URL || 'http://3.84.212.7:7799';
+const BASE_URL = process.env.VFLOW_BASE_URL || 'workflow-db.kelompok3.vflow.parulian.my.id';
 const DEFAULT_TENANT = process.env.VFLOW_TENANT || '_default';
 const REQUEST_TIMEOUT_MS = parseInt(process.env.VFLOW_REQ_TIMEOUT_MS || '12000', 10);
 
@@ -20,7 +20,7 @@ function usage() {
   scripts/vflow-admin.sh | .ps1 | .bat rules remove <rule_set_id>
 
 Environment:
-  VFLOW_BASE_URL  (default: http://3.84.212.7:7799)
+  VFLOW_BASE_URL  (default: workflow-db.kelompok3.vflow.parulian.my.id)
   VFLOW_TENANT    (default: _default)
 `);
 }

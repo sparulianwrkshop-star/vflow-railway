@@ -10,7 +10,7 @@ endpoint dengan `curl`.
 
 | Kebutuhan | Sumber |
 |---|---|
-| Endpoint VFlow Server kelompok 3 | `http://3.84.212.7:7799` (lihat `vflow-test-main/README.md`) |
+| Endpoint VFlow Server kelompok 3 | `workflow-db.kelompok3.vflow.parulian.my.id` (lihat `vflow-test-main/README.md`) |
 | PostgreSQL (lokal/laptop, di-tunnel ke server) | Cloudflare Tunnel TCP — lihat §1 |
 | `node` (untuk `vflow-admin.js`) | terinstall di laptop |
 | `psql`, `curl`, `jq` | terinstall di laptop |
@@ -81,7 +81,7 @@ postgresql://postgres:umkm123@workflow-db.kelompok3.vflow.<domain>:5432/umkm_db
 ```bash
 cd vflow-test-main      # repo client (vflow-admin.sh dkk)
 
-export VFLOW_BASE_URL="http://3.84.212.7:7799"   # kelompok_3
+export VFLOW_BASE_URL="workflow-db.kelompok3.vflow.parulian.my.id"   # kelompok_3
 export VFLOW_TENANT="_default"
 
 # DSN postgres yang dipakai SEMUA connector `postgres` di workflow kita
@@ -409,7 +409,7 @@ sifat detached, dijadwalkan setelah respons diemit):
 psql "$DSN" -c "select * from audit_log where aktivitas_tipe = 'KALKULASI_TAGIHAN' order by id desc limit 1;"
 ```
 
-> Catatan: Workflow 3 memanggil `http://3.84.212.7:7799/umkm/internal/audit-log`
+> Catatan: Workflow 3 memanggil `workflow-db.kelompok3.vflow.parulian.my.id/umkm/internal/audit-log`
 > (endpoint kelompok 3, sama dengan `VFLOW_BASE_URL` default). Jika kalian
 > deploy ke server/kelompok lain, ganti `url` di node `call_audit_log` pada
 > `03-kalkulasi-tagihan.yaml` menjadi `$VFLOW_BASE_URL` server kalian yang
@@ -467,7 +467,7 @@ Pakai script otomatis di §7 untuk versi siap-pakai dari skenario ini.
 Lihat `test/smoke-test.sh` (disertakan dalam paket). Cara pakai:
 
 ```bash
-export VFLOW_BASE_URL="http://3.84.212.7:7799"
+export VFLOW_BASE_URL="workflow-db.kelompok3.vflow.parulian.my.id"
 export DSN="postgresql://postgres:umkm123@127.0.0.1:5432/umkm_db"  # untuk verifikasi DB, jalankan dari mesin yang punya akses psql ke DB yang sama
 bash test/smoke-test.sh
 ```
@@ -484,7 +484,7 @@ Script ini menjalankan seluruh skenario §6 secara otomatis dan mencetak
 | `curl: (28) Connection timed out` | Security group AWS belum buka port 7799, atau endpoint IP berubah | Cek ulang `VFLOW_BASE_URL`, hubungi pengelola server |
 | `HTTP 404` saat hit `/umkm/...` | Workflow belum diprovision, atau route belum sempat teregister | `curl $VFLOW_BASE_URL/_vflow/api/workflows` untuk cek `active:true`; tunggu beberapa saat setelah provision |
 | Connector postgres error (`relation "pesanan" does not exist`) | `db/schema.sql` belum dijalankan, atau DSN salah | Jalankan ulang §1.1; pastikan `VFLOW_POSTGRES_URL` di server mengarah ke DB yang sudah berisi schema |
-| Workflow 3 sukses tapi `audit_log` tidak terisi | Node `call_audit_log` menghardcode `http://3.84.212.7:7799` (endpoint kelompok 3); beda di environment lain | Edit `03-kalkulasi-tagihan.yaml` node `call_audit_log.input_mappings.url` ke endpoint server yang sesuai lalu re-provision workflow 3 |
+| Workflow 3 sukses tapi `audit_log` tidak terisi | Node `call_audit_log` menghardcode `workflow-db.kelompok3.vflow.parulian.my.id` (endpoint kelompok 3); beda di environment lain | Edit `03-kalkulasi-tagihan.yaml` node `call_audit_log.input_mappings.url` ke endpoint server yang sesuai lalu re-provision workflow 3 |
 | `rule_set_id not found` saat panggil Workflow 3 | Rule pack belum di-compile, atau `rule_set_id` di YAML beda dengan yang di-compile | Cek `curl $VFLOW_BASE_URL/api/admin/vrules`; pastikan id `aturan_harga_umkm_v1` ada |
 | Hasil kalkulasi diskon tidak sesuai ekspektasi | Override LWW: rule diskon yang ditulis lebih akhir (document order di `.vdicl`) menang saat kondisi tumpang tindih | Cek ulang urutan rule di `aturan_harga_umkm_v1.vdicl`, atau pertajam kondisi `when` agar mutually exclusive |
 | Ingin reset / ulang dari awal | Workflow/rule pack masih versi lama tersangkut | `vflow-admin.sh workflows unprovision <id>` lalu provision ulang; `rules remove aturan_harga_umkm_v1` lalu compile ulang |

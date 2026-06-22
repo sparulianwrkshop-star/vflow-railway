@@ -102,7 +102,7 @@ spec:
           # Ganti host:port di bawah sesuai endpoint VFlow yang sebenarnya
           # dipakai (sama dengan VFLOW_BASE_URL di TESTING.md), karena
           # Workflow 6 (audit log) ter-provision pada server yang sama.
-          source: { language: literal, source: "http://3.84.212.7:7799/umkm/internal/audit-log" }
+          source: { language: literal, source: "workflow-db.kelompok3.vflow.parulian.my.id/umkm/internal/audit-log" }
         - target: body
           source: { language: spv1, source: "$.audit_payload" }
       output_variable: audit_call_result

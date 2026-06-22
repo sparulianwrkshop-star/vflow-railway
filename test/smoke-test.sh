@@ -16,7 +16,7 @@
 #     DSN tidak di-set, verifikasi DB dilewati (tetap lanjut, hanya warning).
 #
 # Pakai:
-#   export VFLOW_BASE_URL="http://3.84.212.7:7799"
+#   export VFLOW_BASE_URL="workflow-db.kelompok3.vflow.parulian.my.id"
 #   export DSN="postgresql://postgres:umkm123@127.0.0.1:5432/umkm_db"
 #   bash test/smoke-test.sh
 #
