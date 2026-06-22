@@ -28,8 +28,6 @@ output_conflict_policy: LWW
 rules:
   # ---------------------------------------------------------------------
   # KELOMPOK 1 — DISKON (bertingkat: reguler -> member -> grosir)
-  # Ditaruh berurutan dari yang paling kecil ke paling besar supaya pada
-  # kasus tumpang-tindih, LWW memilih diskon paling menguntungkan pelanggan.
   # ---------------------------------------------------------------------
   - id: "DISKON_REGULER_DEFAULT"
     priority: 0
@@ -59,7 +57,7 @@ rules:
   - id: "DISKON_GROSIR"
     priority: 20
     enabled: true
-    description: "Pembelian grosir (>= 20 item) mendapat diskon 10% dari subtotal, menggantikan diskon member jika berlaku bersamaan."
+    description: "Pembelian grosir (>= 20 item) mendapat diskon 10% dari subtotal."
     when: "total_item >= 20"
     then:
       - kind: EVAL_SET_FIELD
@@ -142,15 +140,30 @@ rules:
         path: biaya_pengiriman
         expr: "15000"
 
-  - id: "KIRIM_REGULER"
+  - id: "KIRIM_REGULER_GRATIS"
     priority: 0
     enabled: true
-    description: "Pengiriman reguler dikenakan biaya flat Rp8.000, gratis ongkir bila subtotal sudah >= Rp200.000."
-    when: 'metode_pengambilan == "reguler"'
+    description: "Pengiriman reguler gratis bila subtotal >= Rp200.000."
+    when: 'metode_pengambilan == "reguler" AND subtotal >= 200000'
     then:
       - kind: EVAL_SET_FIELD
         path: biaya_pengiriman
-        expr: if subtotal >= 200000 then 0 else 8000
+        expr: "0"
+      - kind: EMIT
+        severity: INFO
+        code: "FREE_ONGKIR_CHECK"
+        field: "subtotal"
+        msg: "Gratis ongkir reguler diterapkan (subtotal >= Rp200.000)"
+
+  - id: "KIRIM_REGULER_BAYAR"
+    priority: 0
+    enabled: true
+    description: "Pengiriman reguler Rp8.000 bila subtotal < Rp200.000."
+    when: 'metode_pengambilan == "reguler" AND subtotal < 200000'
+    then:
+      - kind: EVAL_SET_FIELD
+        path: biaya_pengiriman
+        expr: "8000"
       - kind: EMIT
         severity: INFO
         code: "FREE_ONGKIR_CHECK"
@@ -163,7 +176,7 @@ rules:
   - id: "GUARD_SUBTOTAL_INVALID"
     priority: 100
     enabled: true
-    description: "Tandai (finding) bila subtotal nol atau negatif; kalkulasi tetap berjalan, keputusan akhir tetap di tangan backend/operator."
+    description: "Tandai bila subtotal nol atau negatif."
     when: "subtotal <= 0"
     then:
       - kind: EMIT
